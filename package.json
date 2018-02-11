@@ -13,7 +13,7 @@
   },
   "scripts": {
     "clean": "git clean -f -X -- lib",
-    "build": "tsc --project",
+    "build": "tsc --project .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "npm run build"
   },
