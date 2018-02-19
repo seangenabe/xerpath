@@ -3,18 +3,18 @@ import ExtensiblePath, {
 } from './lib/extensible-path'
 import ExtensiblePathComponent from './lib/extensible-path-component'
 import ExtensiblePathComponentMaker from './lib/extensible-path-component-maker'
-import ExtensiblePathContext, {
-  createExtensiblePathContext
-} from './lib/extensible-path-context'
+import ExtensiblePathRunner, {
+  createExtensiblePathRunner
+} from './lib/extensible-path-runner'
 import BuiltPath, { concat as concatBuiltPath } from './lib/built-path'
 
 export {
   BuiltPath,
   concatBuiltPath,
   concatExtensiblePath,
-  createExtensiblePathContext,
+  createExtensiblePathRunner,
   ExtensiblePath,
   ExtensiblePathComponent,
   ExtensiblePathComponentMaker,
-  ExtensiblePathContext
+  ExtensiblePathRunner
 }

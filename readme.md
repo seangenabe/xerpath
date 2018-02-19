@@ -38,15 +38,15 @@ import {
   BuiltPath,
   concatBuiltPath, // code
   concatExtensiblePath, // code
-  createExtensiblePathContext, // code
+  createExtensiblePathRunner, // code
   ExtensiblePath,
   ExtensiblePathComponent,
   ExtensiblePathComponentMaker,
-  ExtensiblePathContext
+  ExtensiblePathRunner
 } from 'xerpath'
 ```
 
-### ExtensiblePath
+### ExtensiblePath<TContext = any>
 
 This is the path passed by the user. This is a route function:
 
@@ -55,6 +55,8 @@ E.g.
 ```typescript
 r => r`foo/${r.param('a')}/bar`
 ```
+
+For providing a context, see [§ Providing a context](#providing-a-context)
 
 ### ExtensiblePathComponentMaker
 
@@ -89,7 +91,7 @@ If a match is found, the object will additionally contain the properties:
 * `value` - Provider-defined value of the match. (E.g. a component maker `param` for an HTTP router might return a string up to a slash)
 * `remainingPath` - Remaining part of the string path after matching. (E.g. as in the example above, an HTTP router might return the rest of the string after the slash.)
 
-### ExtensiblePathContext
+### ExtensiblePathRunner
 
 E.g.
 
@@ -97,22 +99,49 @@ E.g.
 r
 ```
 
-The context is defined by the provider as a function that acts as the tag for the path. It also acts as a key-value store for the component makers the provider defines.
+The runner is defined by the provider as a function that acts as the tag for the path. The runner is passed as an argument to the consumer-provided route.
 
-The context must return an iterable collection of strings and `ExtensiblePathComponent`s, in the order in which they appeared in the string. A `createExtensiblePathContext` function is provided that does this.
+The runner must return an iterable collection of strings and `ExtensiblePathComponent`s, in the order in which they appeared in the string. A `createExtensiblePathRunner` function is provided that does this.
 
 Note: The iterable may contain empty strings and should be handled by the provider's route function.
+
+### Providing a context
+
+The provider may provide a context that has string properties and `ExtensibleComponentMaker` values, which are assigned directly to the runner. This enables the consumer to use them and generate path components.
+
+When using TypeScript, the context may then be declared as an interface and used with the extensible path. If the type argument is passed to the path as the type parameter `TContext`, this will give the runner variable the intersection type `ExtensiblePathRunner & TContext`. (Note that `TContext` defaults to `any`.)
+
+```typescript
+interface MyContext {
+  word(): ExtensiblePathComponent
+}
+function word() {
+  /* ... */
+}
+
+let r: ExtensiblePathRunner & MyContext
+r = createExtensiblePathRunner<MyContext>({ word })
+
+function route(path: ExtensiblePath<MyContext>) {
+  /* ... */
+}
+
+// r.word would be strongly typed here.
+// This enables consumers who are using TypeScript to validate types
+// or check the documentation of this function.
+route(r => r`orange ${r.word()} apple`)
+```
 
 ### Concatenate extensible paths and built paths
 
 As extensible paths are just glorified strings, we can concatenate them together. Functions to concatenate extensible paths as well as built paths are provided.
 
-### Assigning path makers to the context
+### Assigning path component makers to the context
 
 E.g.
 
-```typescript
-r = createExtensiblePathContext()
+```javascript
+let r = createExtensiblePathRunner()
 // A path component that matches up to the next space.
 r.word = () => s => {
   if (s.length === 0) {
@@ -134,4 +163,4 @@ r.regex = regex => s => {
 
 ### Consuming the path
 
-To build a path, simply call the path with the context.
+To build a path, simply call the path with the runner/context.
