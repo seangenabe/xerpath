@@ -12,6 +12,9 @@ export default interface ExtensiblePathRunner {
 function createExtensiblePathRunner(): ExtensiblePathRunner
 function createExtensiblePathRunner<
   TContext extends Record<keyof TContext, ExtensiblePathComponentMaker> = any
+>(context: TContext): ExtensiblePathRunner & TContext
+function createExtensiblePathRunner<
+  TContext extends Record<keyof TContext, ExtensiblePathComponentMaker> = any
 >(context?: TContext): ExtensiblePathRunner & TContext {
   const ret1: ExtensiblePathRunner = function*(
     strings: TemplateStringsArray,
