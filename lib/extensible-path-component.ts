@@ -1,5 +1,3 @@
 export default interface ExtensiblePathComponent {
-  (s: string):
-    | { match: false }
-    | { match: true; value?: any; remainingPath: string }
+  (s: string): null | undefined | { value?: any; remainingPath: string }
 }
