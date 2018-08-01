@@ -46,7 +46,15 @@ import {
 } from 'xerpath'
 ```
 
-### ExtensiblePath<TContext = any>
+### ExtensiblePath
+
+```typescript
+interface ExtensiblePath<
+  TContext extends Record<keyof TContext, ExtensiblePathComponentMaker>
+> {
+  (r: ExtensiblePathRunner & TContext): BuiltPath
+}
+```
 
 This is the path passed by the user. This is a route function:
 
@@ -59,6 +67,12 @@ r => r`foo/${r.param('a')}/bar`
 For providing a context, see [§ Providing a context](#providing-a-context)
 
 ### ExtensiblePathComponentMaker
+
+```typescript
+interface ExtensiblePathComponentMaker {
+  (...args: any[]): ExtensiblePathComponent
+}
+```
 
 E.g.
 
@@ -74,6 +88,12 @@ The signature of the component maker is a function which takes arguments from th
 
 ### ExtensiblePathComponent
 
+```typescript
+interface ExtensiblePathComponent {
+  (s: string): null | undefined | { value?: any; remainingPath: string }
+}
+```
+
 This is an individual custom path component defined by the consumer.
 
 E.g. The result of:
@@ -88,10 +108,19 @@ An object with the property `match` is returned that indicates whether a match i
 
 If a match is found, the object will additionally contain the properties:
 
-* `value` - Provider-defined value of the match. (E.g. a component maker `param` for an HTTP router might return a string up to a slash)
-* `remainingPath` - Remaining part of the string path after matching. (E.g. as in the example above, an HTTP router might return the rest of the string after the slash.)
+- `value` - Provider-defined value of the match. (E.g. a component maker `param` for an HTTP router might return a string up to a slash)
+- `remainingPath` - Remaining part of the string path after matching. (E.g. as in the example above, an HTTP router might return the rest of the string after the slash.)
 
 ### ExtensiblePathRunner
+
+```typescript
+interface ExtensiblePathRunner {
+  (
+    strings: TemplateStringsArray,
+    ...values: ExtensiblePathComponent[]
+  ): BuiltPath
+}
+```
 
 E.g.
 
@@ -104,6 +133,20 @@ The runner is defined by the provider as a function that acts as the tag for the
 The runner must return an iterable collection of strings and `ExtensiblePathComponent`s, in the order in which they appeared in the string. A `createExtensiblePathRunner` function is provided that does this.
 
 Note: The iterable may contain empty strings and should be handled by the provider's route function.
+
+### BuiltPath
+
+```typescript
+type BuiltPath = Iterable<string | ExtensiblePathComponent>
+```
+
+E.g. the result of:
+
+```typescript
+r`foo/${r.param('a')}/bar`
+```
+
+The result of running the extensible path runner.
 
 ### Providing a context
 
@@ -134,31 +177,39 @@ route(r => r`orange ${r.word()} apple`)
 
 ### Concatenate extensible paths and built paths
 
-As extensible paths are just glorified strings, we can concatenate them together. Functions to concatenate extensible paths as well as built paths are provided.
+As extensible paths are just glorified strings, we can concatenate them together. Helper functions to concatenate extensible paths as well as built paths are provided.
 
 ### Assigning path component makers to the context
 
 E.g.
 
 ```javascript
-let r = createExtensiblePathRunner()
-// A path component that matches up to the next space.
-r.word = () => s => {
-  if (s.length === 0) {
-    return { match: false }
+let r = createExtensiblePathRunner({
+  // A path component that matches up to the next space.
+  word() {
+    return s => {
+      if (s.length === 0) {
+        return { match: false }
+      }
+      const res = /([^\s]*)(.*)/
+      return { match: true, value: res[1], remainingPath: res[2] }
+    }
+  },
+  // A path component that matches a regular expression.
+  regex(regex) {
+    return s => {
+      const res = regex.exec(s)
+      if (res == null) {
+        return { match: false }
+      }
+      return {
+        match: true,
+        value: res[0],
+        remainingPath: s.substr(res[0].length)
+      }
+    }
   }
-  const res = /([^\s]*)(.*)/
-  return { match: true, value: res[1], remainingPath: res[2] }
-}
-
-// A path component that matches a regular expression.
-r.regex = regex => s => {
-  const res = regex.exec(s)
-  if (res == null) {
-    return { match: false }
-  }
-  return { match: true, value: res[0], remainingPath: s.substr(res[0].length) }
-}
+})
 ```
 
 ### Consuming the path
