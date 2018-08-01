@@ -66,6 +66,8 @@ r => r`foo/${r.param('a')}/bar`
 
 For providing a context, see [§ Providing a context](#providing-a-context)
 
+The extensible path may provide its own `toString` method that will be aggregated when the `toString` function of the return value of `concatExtensiblePath` is called.
+
 ### ExtensiblePathComponentMaker
 
 ```typescript
@@ -138,6 +140,8 @@ Note: The iterable may contain empty strings and should be handled by the provid
 
 ```typescript
 type BuiltPath = Iterable<string | ExtensiblePathComponent>
+
+import { BuiltPath } from 'xerpath/lib/built-path'
 ```
 
 E.g. the result of:
