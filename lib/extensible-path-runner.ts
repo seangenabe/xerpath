@@ -2,18 +2,19 @@ import ExtensiblePathComponent from './extensible-path-component'
 import BuiltPath from './built-path'
 import ExtensiblePathComponentMaker from './extensible-path-component-maker'
 
-export default interface ExtensiblePathRunner {
+export interface ExtensiblePathRunner {
   (
     strings: TemplateStringsArray,
     ...values: ExtensiblePathComponent[]
   ): BuiltPath
 }
+export default ExtensiblePathRunner
 
-function createExtensiblePathRunner(): ExtensiblePathRunner
-function createExtensiblePathRunner<
+export function createExtensiblePathRunner(): ExtensiblePathRunner
+export function createExtensiblePathRunner<
   TContext extends Record<keyof TContext, ExtensiblePathComponentMaker> = any
 >(context?: TContext): ExtensiblePathRunner & TContext
-function createExtensiblePathRunner<
+export function createExtensiblePathRunner<
   TContext extends Record<keyof TContext, ExtensiblePathComponentMaker> = any
 >(context?: TContext): ExtensiblePathRunner & TContext {
   const ret1: ExtensiblePathRunner = function*(
@@ -31,4 +32,3 @@ function createExtensiblePathRunner<
     {}) as TContext)
   return ret2
 }
-export { createExtensiblePathRunner }

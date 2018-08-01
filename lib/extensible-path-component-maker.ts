@@ -1,6 +1,6 @@
 import ExtensiblePathComponent from './extensible-path-component'
 
-interface ExtensiblePathComponentMaker {
+export interface ExtensiblePathComponentMaker {
   (...args: any[]): ExtensiblePathComponent
 }
 

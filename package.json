@@ -13,9 +13,10 @@
   },
   "scripts": {
     "clean": "git clean -f -X -- lib",
-    "build": "tsc --project .",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "docs": "typedoc --out docs ."
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 import ExtensiblePathComponent from './extensible-path-component'
 
-type BuiltPath = Iterable<string | ExtensiblePathComponent>
+export type BuiltPath = Iterable<string | ExtensiblePathComponent>
 export default BuiltPath
 
 export function concat(...paths: string[]): string
