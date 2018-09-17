@@ -24,9 +24,10 @@
   },
   "keywords": [
     "router",
-    "routing"
+    "routing",
+    "path"
   ],
-  "author": "Sean Genabe <seangenabe@outlook.com>",
+  "author": "Sean Genabe <seanmarviolivergenabe@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/seangenabe/xerpath/issues"
