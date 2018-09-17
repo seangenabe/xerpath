@@ -39,35 +39,35 @@ Ultimately, this specification is defined by the TypeScript typings.
 ```typescript
 import {
   BuiltPath,
+  BuiltPathComponent,
+  BuiltPathComponentMaker,
   concatBuiltPath, // code
   concatExtensiblePath, // code
   createExtensiblePathRunner, // code
-  ExtensiblePath,
-  ExtensiblePathComponent,
-  ExtensiblePathComponentMaker,
-  ExtensiblePathRunner
+  Path,
+  PathRunner
 } from 'xerpath'
 ```
 
 
 ### Providing a context
 
-The provider may provide a context that has string properties and `ExtensibleComponentMaker` values, which are assigned directly to the runner. This enables the consumer to use them and generate path components.
+The provider may provide a context that has string properties and `BuiltPathComponentMaker` values, which are assigned directly to the runner. This enables the consumer to use them and generate path components.
 
-When using TypeScript, the context may then be declared as an interface and used with the extensible path. If the type argument is passed to the path as the type parameter `TContext`, this will give the runner variable the intersection type `ExtensiblePathRunner & TContext`. (Note that `TContext` defaults to `any`.)
+When using TypeScript, the context may then be declared as an interface and used with the extensible path. If the type argument is passed to the path as the type parameter `TContext`, this will give the runner variable the intersection type `PathRunner & TContext`. (Note that `TContext` defaults to `any`.)
 
 ```typescript
 interface MyContext {
-  word(): ExtensiblePathComponent
+  word(): BuiltPathComponent
 }
 function word() {
   /* ... */
 }
 
-let r: ExtensiblePathRunner & MyContext
-r = createExtensiblePathRunner<MyContext>({ word })
+let r: PathRunner & MyContext
+r = createPathRunner<MyContext>({ word })
 
-function route(path: ExtensiblePath<MyContext>) {
+function route(path: Path<MyContext>) {
   /* ... */
 }
 
@@ -93,7 +93,7 @@ As extensible paths are just glorified strings, we can concatenate them together
 E.g.
 
 ```javascript
-let r = createExtensiblePathRunner({
+let r = createPathRunner({
   // A path component that matches up to the next space.
   word() {
     return s => {
@@ -125,25 +125,33 @@ let r = createExtensiblePathRunner({
 ## API
 
 
-### `lib/extensible-path`
+### `path`
 
+#### PathSingle<TContext>
 
-#### ExtensiblePath
-
-```typescript
-export interface ExtensiblePath<
-  TContext extends Record<keyof TContext, ExtensiblePathComponentMaker>
-> {
-  (r: ExtensiblePathRunner & TContext): BuiltPath
+```ts
+export interface PathSingle<TContext> {
+  (r: PathRunner & TContext): BuiltPath
 }
 ```
 
-This is a path passed by the consumer to the provider. This is a function taking in the route context and returning a route.
+A part of a path that takes the route context as an argument and outputs a `BuiltPath`.
+
+#### Path<TContext>
+
+```typescript
+export type Path<TContext> = ReadonlyArray<PathSingle<TContext> | string>
+```
+
+This is a path passed by the consumer to the provider.
 
 E.g.
 
 ```typescript
 r => r`foo/${r.param('a')}/bar`
+
+// Output by concat
+['aaa/', r => r`${r.param('b')}`]
 ```
 
 For providing a context, see [§ Providing a context](#providing-a-context)
@@ -158,17 +166,17 @@ export function concat<
 >(...paths: (string | ExtensiblePath<TContext>)[]): ExtensiblePath<TContext>
 ```
 
-Helper function to concatenate `ExtensiblePath`s.
+Helper function to concatenate `BuiltPath`s.
 
 
-### `lib/extensible-path-component-maker`
+### `built-path-component-maker`
 
 
-#### ExtensiblePathComponentMaker
+#### BuiltPathComponentMaker
 
 ```typescript
-export interface ExtensiblePathComponentMaker {
-  (...args: any[]): ExtensiblePathComponent
+export interface BuiltPathComponentMaker {
+  (...args: any[]): BuiltPathComponent
 }
 ```
 
@@ -185,18 +193,18 @@ For example, an HTTP router might provide a `param` function for a single parame
 The signature of the component maker is a function which takes arguments from the consumer and returns an extensible path component. For example, a `param` component maker might take a HTTP route parameter name.
 
 
-### `lib/extensible-path-component`
+### `built-path-component`
 
 
-#### ExtensiblePathComponent
+#### BuiltPathComponent
 
-```typescript
-export interface ExtensiblePathComponent {
+```ts
+export interface BuiltPathComponent {
   (s: string): null | undefined | { value?: any; remainingPath: string }
 }
 ```
 
-This is an individual custom path component returned from an `ExtensiblePathComponentMaker` function.
+This is an individual custom path component returned from an `BuiltPathComponentMaker` function.
 
 E.g. The result of:
 
@@ -214,13 +222,13 @@ If a match is found, the object will additionally contain the properties:
 - `remainingPath` - Remaining part of the string path after matching. (E.g. as in the example above, an HTTP router might return the rest of the string after the slash.) If there are no more characters remaning in the string, return the empty string.
 
 
-### `lib/extensible-path-runner`
+### `path-runner`
 
 
-#### ExtensiblePathRunner
+#### PathRunner
 
 ```typescript
-export interface ExtensiblePathRunner {
+export interface PathRunner {
   (
     strings: TemplateStringsArray,
     ...values: ExtensiblePathComponent[]
@@ -236,9 +244,9 @@ r
 
 The runner is defined by the provider as a function that acts as the tag for the path. The runner is passed as an argument to the consumer-provided route. The runner doubles as the context for consumer routes. ([§ Providing a context](#providing-a-context))
 
-The runner must return an iterable collection of strings and `ExtensiblePathComponent`s, in the order in which they appeared in the string. A `createExtensiblePathRunner` function is provided that does this.
+The runner must return an array of strings and `BuiltPathComponent`s, in the order in which they appeared in the string. A `createExtensiblePathRunner` function is provided that does this.
 
-Note: The iterable may contain empty strings and should be handled by the provider's route function.
+Note: The array may contain empty strings and should be handled by the provider's route function.
 
 
 #### createExtensiblePathRunner
@@ -253,16 +261,16 @@ export function createExtensiblePathRunner<
 See [§ Providing a context](#providing-a-context).
 
 
-### `lib/built-path`
+### `built-path`
 
 
 #### BuiltPath
 
 ```typescript
-export type BuiltPath = Iterable<string | ExtensiblePathComponent>
+export type BuiltPath = ReadonlyArray<string | BuiltPathComponent>
 ```
 
-A route. The result of running the extensible path runner against an `ExtensiblePath`.
+A route. The result of running the path runner against a `Path`.
 
 E.g. the result of:
 

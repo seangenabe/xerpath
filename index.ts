@@ -1,24 +1,16 @@
-import ExtensiblePath, {
-  concat as concatExtensiblePath
-} from './lib/extensible-path'
-import ExtensiblePathComponent from './lib/extensible-path-component'
-import ExtensiblePathComponentMaker from './lib/extensible-path-component-maker'
-import ExtensiblePathRunner, {
-  createExtensiblePathRunner
-} from './lib/extensible-path-runner'
-import BuiltPath, { concat as concatBuiltPath } from './lib/built-path'
-type Path<
-  TContext extends Record<keyof TContext, ExtensiblePathComponentMaker>
-> = string | ExtensiblePath<TContext>
+import { Path, concat as concatPath } from './path'
+import { BuiltPathComponent } from './built-path-component'
+import { BuiltPathComponentMaker } from './built-path-component-maker'
+import { PathRunner, createPathRunner } from './path-runner'
+import { BuiltPath, concat as concatBuiltPath } from './built-path'
 
 export {
   BuiltPath,
+  BuiltPathComponent,
+  BuiltPathComponentMaker,
   concatBuiltPath,
-  concatExtensiblePath,
-  createExtensiblePathRunner,
-  ExtensiblePath,
-  ExtensiblePathComponent,
-  ExtensiblePathComponentMaker,
-  ExtensiblePathRunner,
-  Path
+  concatPath,
+  createPathRunner,
+  Path,
+  PathRunner
 }
