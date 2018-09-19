@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "sourceMap": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "sourceMap": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "target": "esnext"
   }
 }
