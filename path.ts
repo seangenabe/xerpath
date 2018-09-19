@@ -3,15 +3,15 @@ import { ContextType } from './context-type'
 import { PathRunner } from './path-runner'
 import { flatten } from './helpers'
 
-export interface PathSingle<TContext extends ContextType<TContext>> {
+export interface PathSingle<TContext extends ContextType<TContext> = any> {
   (r: PathRunner & TContext): BuiltPath
 }
 
 type MaybeReadonlyArray<T> = ReadonlyArray<T> | T
 
-export type Path<TContext extends ContextType<TContext>> = MaybeReadonlyArray<
-  PathSingle<TContext> | string
->
+export type Path<
+  TContext extends ContextType<TContext> = any
+> = MaybeReadonlyArray<PathSingle<TContext> | string>
 
 export default Path
 
